@@ -52,10 +52,12 @@ logger = logging.getLogger(__name__)
 
 # Test credentials - These match the dummy data in init-db.sql
 # All users have password: password123
+# These are the EXACT credentials from the database initialization script
 TEST_CREDENTIALS = [
     {"email": "user1@example.com", "password": "password123"},
     {"email": "user2@example.com", "password": "password123"},
     {"email": "user3@example.com", "password": "password123"},
+    {"email": "admin@example.com", "password": "password123"},
 ]
 
 # Test account numbers - UPDATE THESE with valid account numbers from your test data
@@ -67,6 +69,9 @@ class BaseUser(HttpUser):
     Base user class with common authentication and helper methods.
     All user scenarios inherit from this class.
     """
+    
+    # Mark as abstract so Locust doesn't try to instantiate it
+    abstract = True
     
     # Realistic think time between tasks: 1-3 seconds
     wait_time = between(1, 3)
@@ -84,10 +89,12 @@ class BaseUser(HttpUser):
         base_url = self.host or "http://gateway-service:8080"
         logger.info(f"User starting with base URL: {base_url}")
         
-        # Select random credentials for this user
+        # Select random credentials for this user from the test data
+        # These credentials are guaranteed to exist in the database
         creds = random.choice(TEST_CREDENTIALS)
         self.email = creds["email"]
         self.password = creds["password"]
+        logger.info(f"Using test credentials: {self.email}")
         
         # Authenticate
         self.authenticate()

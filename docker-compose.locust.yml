@@ -9,13 +9,20 @@ services:
     ports:
       - "8089:8089"  # Locust web UI
     # Connect to the same network as backend services
+    # Note: Docker Compose may prefix network name with directory
+    # If connection fails, try: docker network connect <network-name> bank-locust
     networks:
+      - default
       - onlinebanking-network
-    # Default command - host can be set in Locust UI or via command override
-    # When on same network, use: http://gateway-service:8080
+    # Default command - host can be overridden in Locust UI
+    # Priority: 1) gateway-service:8080 (same network), 2) host.docker.internal:8080 (fallback)
     command: locust -f locustfile.py --host http://gateway-service:8080
     restart: unless-stopped
+    # Enable host.docker.internal for fallback access
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 networks:
   onlinebanking-network:
+    name: onlinebanking-network
     external: true
