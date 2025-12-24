@@ -50,7 +50,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Test credentials - UPDATE THESE with valid test user credentials
+# Test credentials - These match the dummy data in init-db.sql
+# All users have password: password123
 TEST_CREDENTIALS = [
     {"email": "user1@example.com", "password": "password123"},
     {"email": "user2@example.com", "password": "password123"},

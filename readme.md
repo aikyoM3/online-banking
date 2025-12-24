@@ -41,6 +41,36 @@ docker-compose up --build
 
 Service startup is dependency-aware. Each service waits until databases, RabbitMQ, and Eureka are healthy before launching.
 
+## Database Configuration
+
+The project uses a single MySQL database named `projectdb` with the following credentials:
+- **Database**: projectdb
+- **Username**: testuser
+- **Password**: testpass
+- **Port**: 3306
+
+### Test Users
+
+The database is automatically initialized with dummy test data including:
+
+**Test Users (Password: `password123`):**
+- user1@example.com / password123
+- user2@example.com / password123
+- user3@example.com / password123
+- admin@example.com / password123
+
+**Test Accounts:**
+- Account 1000001 (user-001, Savings, $10,000)
+- Account 1000002 (user-001, Checking, $5,000)
+- Account 1000003 (user-002, Savings, $15,000)
+- Account 1000004 (user-002, Checking, $7,500)
+- Account 1000005 (user-003, Savings, $20,000)
+
+**Test Transactions:**
+- Sample transaction history is included for testing
+
+The database initialization script (`server/init-db.sql`) runs automatically when the MySQL container starts for the first time.
+
 ## Load Testing with Locust
 
 This project includes Dockerized HTTP load testing using Locust, targeting the API Gateway.
