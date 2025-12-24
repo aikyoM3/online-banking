@@ -12,6 +12,9 @@ From the `server` directory, run:
 
 ```bash
 docker-compose up --build
+
+```
+
 This will:
 
 Build all service JARs
@@ -34,7 +37,7 @@ Gateway → http://localhost:8080
 Eureka Dashboard → http://localhost:8761
 
 RabbitMQ UI → http://localhost:15672
- (guest / guest)
+(guest / guest)
 
 Service startup is dependency-aware. Each service waits until databases, RabbitMQ, and Eureka are healthy before launching.
 
@@ -48,21 +51,17 @@ Build the Locust image:
 
 docker build -f Dockerfile.locust -t bank-locust .
 
-
 Run Locust:
 
 docker run -p 8089:8089 bank-locust
-
 
 Or via Docker Compose:
 
 docker compose -f docker-compose.locust.yml up
 
-
 Open the Locust UI:
 
 http://localhost:8089
-
 
 Configure:
 
@@ -95,4 +94,7 @@ GET /api/v1/user/{id} — customer profile
 GET /api/v1/beneficiary/{id} — beneficiary details
 
 Optional authentication via /api/v1/login (disabled by default)
+
+```
+
 ```
