@@ -8,4 +8,22 @@
 
 ## ER Diagram
 
-![erdiagram](./erdiagram/ER.png)
+How to Run
+
+From the server directory, run:
+
+docker-compose up --build
+
+This will:
+Build all service JARs automatically
+Start all databases (MySQL instances)
+Start RabbitMQ
+Start Discovery Service (Eureka)
+Start Gateway Service
+Start all microservices (Authentication, Customer, Account, Notification)
+
+All services will be available at:
+Gateway: http://localhost:8080
+Eureka Dashboard: http://localhost:8761
+RabbitMQ Management: http://localhost:15672 (guest/guest)
+The configuration is ready to use. Services will wait for their dependencies (databases, RabbitMQ, Eureka) to be healthy before starting.

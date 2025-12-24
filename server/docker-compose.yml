@@ -16,11 +16,13 @@ services:
       test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 30s
     networks:
       - onlinebanking-network
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
+    restart: unless-stopped
 
   # ========== DATABASES (Database per Service) ==========
 
@@ -34,14 +36,16 @@ services:
       MYSQL_DATABASE: db_auth
       MYSQL_ROOT_HOST: '%'
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p160220057a" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 30s
     volumes:
       - mysql-auth-data:/var/lib/mysql
     networks:
       - onlinebanking-network
+    restart: unless-stopped
 
   mysql-customer:
     image: mysql:8.0
@@ -53,14 +57,16 @@ services:
       MYSQL_DATABASE: db_customer
       MYSQL_ROOT_HOST: '%'
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p160220057a" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 30s
     volumes:
       - mysql-customer-data:/var/lib/mysql
     networks:
       - onlinebanking-network
+    restart: unless-stopped
 
   mysql-account:
     image: mysql:8.0
@@ -72,14 +78,16 @@ services:
       MYSQL_DATABASE: db_account
       MYSQL_ROOT_HOST: '%'
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p160220057a" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 30s
     volumes:
       - mysql-account-data:/var/lib/mysql
     networks:
       - onlinebanking-network
+    restart: unless-stopped
 
   mysql-notification:
     image: mysql:8.0
@@ -91,41 +99,42 @@ services:
       MYSQL_DATABASE: db_notification
       MYSQL_ROOT_HOST: '%'
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p160220057a" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 30s
     volumes:
       - mysql-notification-data:/var/lib/mysql
     networks:
       - onlinebanking-network
+    restart: unless-stopped
 
   # ========== MICROSERVICES ==========
 
   discovery-service:
     build:
-      context: ./discovery-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: discovery-service/Dockerfile
     container_name: discovery-service
     ports:
       - "8761:8761"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
     networks:
       - onlinebanking-network
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8761/eureka/status" ]
+      test: ["CMD-SHELL", "ps aux | grep -v grep | grep java || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 40s
+    restart: unless-stopped
 
   gateway-service:
     build:
-      context: ./gateway-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: gateway-service/Dockerfile
     container_name: gateway-service
     ports:
       - "8080:8080"
@@ -137,11 +146,18 @@ services:
         condition: service_healthy
     networks:
       - onlinebanking-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep -v grep | grep java || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
 
   authentication-service:
     build:
-      context: ./authentication-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: authentication-service/Dockerfile
     container_name: authentication-service
     ports:
       - "8081:8081"
@@ -164,11 +180,18 @@ services:
         condition: service_healthy
     networks:
       - onlinebanking-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep -v grep | grep java || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
 
   customer-service:
     build:
-      context: ./customer-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: customer-service/Dockerfile
     container_name: customer-service
     ports:
       - "8082:8082"
@@ -191,11 +214,18 @@ services:
         condition: service_healthy
     networks:
       - onlinebanking-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep -v grep | grep java || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
 
   account-service:
     build:
-      context: ./account-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: account-service/Dockerfile
     container_name: account-service
     ports:
       - "8083:8083"
@@ -218,11 +248,18 @@ services:
         condition: service_healthy
     networks:
       - onlinebanking-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep -v grep | grep java || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
 
   notification-service:
     build:
-      context: ./notification-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: notification-service/Dockerfile
     container_name: notification-service
     ports:
       - "8084:8084"
@@ -238,8 +275,8 @@ services:
       SPRING_RABBITMQ_PASSWORD: guest
       SPRING_MAIL_HOST: smtp.gmail.com
       SPRING_MAIL_PORT: 587
-      SPRING_MAIL_USERNAME: ${MAIL_USERNAME}
-      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD}
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME:-your-email@gmail.com}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD:-your-app-password}
     depends_on:
       discovery-service:
         condition: service_healthy
@@ -249,6 +286,13 @@ services:
         condition: service_healthy
     networks:
       - onlinebanking-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep -v grep | grep java || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
 
 volumes:
   mysql-auth-data:
